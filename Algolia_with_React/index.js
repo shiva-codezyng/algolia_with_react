@@ -43,9 +43,13 @@ app.use(express.urlencoded({ extended: true }));
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // api for searching the data. Here, "index.search" method gives a promise, it gives data if the search gets that keyword.
-app.post('/search', function(req, res) {
-    const searchWord = req.body.searchItem;
-        
+app.get('/search', function(req, res) {
+    const searchWord = req.query.searchItem;
+    console.log("request query parameter is", searchWord);
+
+    // Remember:- To have a "get" request, we should use query parameter. We can not send the "request body" in http get request.
+    // If we use "req.body", then we should use "post request" and the request data should be in "json format".
+
     index.search(searchWord)
         .then(({hits}) => {
             if (hits.length) {
