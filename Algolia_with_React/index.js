@@ -27,7 +27,7 @@ const ADMIN_API_KEY = "0472cce5fd0f92cd6723dfbca2da7a33";
 const client = algoliasearch(APPLICATION_ID, ADMIN_API_KEY);
 
 // initialize the index. Enter the correct index name.
-const index = client.initIndex('video_info');
+const index = client.initIndex('testObjectsDetector');
 
 
 
@@ -39,43 +39,37 @@ app.use(cors());
 // "urlencoded" middleware gives the urlencoded form for the post request.
 app.use(express.urlencoded({ extended: true }));
 
-// -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-// we can set the search settings.
-// index.setSettings({
-//   // Select the attributes you want to search in
-//   searchableAttributes: [
-//     'brand', 'name', 'categories', 'description', "objectID"
-//   ],
-//   // Define business metrics for ranking and sorting
-//   customRanking: [
-//     '(objectID)'
-//   ],
-//   // Set up some attributes to filter results on
-//   attributesForFaceting: [
-//     // 'categories', 'searchable(brand)', 'price'
-//     'name', 'objectID'
-//   ]
-//   })
-//   .then(({ hits }) => {
-//     console.log(hits);
-//   })
-//   .catch(err => {
-//     console.log(err);
-//   })
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // api for searching the data. Here, "index.search" method gives a promise, it gives data if the search gets that keyword.
-app.post('/search', async function(req, res) {
+app.post('/search', function(req, res) {
     const searchWord = req.body.searchItem;
-
-    await index.search(searchWord)
+        
+    index.search(searchWord)
         .then(({hits}) => {
             if (hits.length) {
-                res.send({"search_results": hits});
-                console.log(hits);
+                var searchResults = [];
+                
+                hits.forEach(object => {
+                    var individualObject = {
+                        "videoID": object.videoID,
+                        "userID": object.userID,
+                        "type": object.type,
+                        "entityDescription": object.entityDescription,
+                        "entityID": object.entityID,
+                        "startTime": object.startTime,
+                        "endTime": object.endTime,
+                        "duration": object.duration
+                };
+
+                searchResults.push(individualObject);
+
+                });
+        
+
+                res.send({"search_results": searchResults});
+                console.log(searchResults);
             // if the user doesn't provide any searchItem, then 
             } else {
                 res.send("no results found");
@@ -87,6 +81,7 @@ app.post('/search', async function(req, res) {
             console.log(err);
         });
 });
+
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -177,7 +172,6 @@ app.post('/deleteObject', async function(req, res) {
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 
 var port = process.env.PORT || 3000;
 
